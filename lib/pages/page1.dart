@@ -15,18 +15,19 @@ class Page1 extends StatefulWidget {
 class _Page1State extends State<Page1> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  bool passToggle = true;
 
-  // Méthode pour la connexion
   void login(String email, String password) async {
-    // Vérification des champs vides avant l'envoi
     if (email.isEmpty || password.isEmpty) {
       _showErrorDialog("Veuillez remplir tous les champs.");
       return;
     }
 
     try {
-      print('Email: $email'); // Affichez l'e-mail saisi
-      print('Mot de passe: $password'); // Affichez le mot de passe saisi
+      // ignore: avoid_print
+      print('Email: $email');
+      // ignore: avoid_print
+      print('Mot de passe: $password');
 
       final response = await http.post(
         Uri.parse(
@@ -37,20 +38,21 @@ class _Page1State extends State<Page1> {
         },
       );
 
-      // Afficher le code de réponse et le corps de la réponse pour le débogage
+      // ignore: avoid_print
       print('Statut de la réponse: ${response.statusCode}');
+      // ignore: avoid_print
       print('Corps de la réponse: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         String accessToken = data['accessToken'];
+        // ignore: avoid_print
         print('Connexion réussie. Token: $accessToken');
 
-        // Stocker le token
         await _storeToken(accessToken);
 
-        // Rediriger vers la page d'accueil après connexion
         Navigator.pushReplacement(
+          // ignore: use_build_context_synchronously
           context,
           MaterialPageRoute(builder: (context) => const Page3()),
         );
@@ -67,6 +69,7 @@ class _Page1State extends State<Page1> {
         _showErrorDialog(errorMessage);
       }
     } catch (e) {
+      // ignore: avoid_print
       print("Erreur de connexion: $e");
       _showErrorDialog("Une erreur s'est produite. Veuillez réessayer.");
     }
@@ -164,17 +167,27 @@ class _Page1State extends State<Page1> {
                       TextFormField(
                         controller: passwordController,
                         obscureText: true,
-                        decoration: const InputDecoration(
-                          enabledBorder: OutlineInputBorder(
+                        decoration: InputDecoration(
+                          enabledBorder: const OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.white),
                             borderRadius:
                                 BorderRadius.all(Radius.circular(1.0)),
                           ),
-                          border: OutlineInputBorder(),
-                          focusedBorder: OutlineInputBorder(
+                          border: const OutlineInputBorder(),
+                          focusedBorder: const OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.white),
                             borderRadius:
                                 BorderRadius.all(Radius.circular(8.0)),
+                          ),
+                          suffix: InkWell(
+                            onTap: () {
+                              setState(() {
+                                passToggle = !passToggle;
+                              });
+                            },
+                            child: Icon(passToggle
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined),
                           ),
                         ),
                       ),
@@ -241,15 +254,6 @@ class _Page1State extends State<Page1> {
                     ),
                   ),
                 ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 570, left: 100),
-              child: Image.asset(
-                height: 200,
-                width: 200,
-                'assets/TODOLIST2.png', // Correction du chemin
-                color: Colors.white,
               ),
             ),
           ],

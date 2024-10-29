@@ -1,6 +1,9 @@
-import 'dart:convert'; // Ajoutez ceci pour jsonEncode
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todolist_app/widgets/list.dart';
 
 class Page3 extends StatefulWidget {
   const Page3({super.key});
@@ -11,6 +14,8 @@ class Page3 extends StatefulWidget {
 
 class _Page3State extends State<Page3> {
   TextEditingController titleController = TextEditingController();
+  // ignore: prefer_final_fields
+  Completer<void> _primaryCompleter = Completer<void>();
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +85,25 @@ class _Page3State extends State<Page3> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 2),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TodoList(),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      "Créer un",
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -89,39 +113,62 @@ class _Page3State extends State<Page3> {
     );
   }
 
-  // Fonction pour envoyer les données à l'API avec authentification
   Future<void> soumettreData() async {
-    final title = titleController.text;
+    final titre = titleController.text.trim();
+    if (titre.isEmpty) {
+      showErrorMessage('Veuillez entrer un titre.');
+      return;
+    }
+
+    final body = {
+      "contenu": titre,
+    };
+    // ignore: prefer_const_declarations
     final url = 'https://todolist-api-production-1e59.up.railway.app/task';
     final uri = Uri.parse(url);
 
-    // En-têtes pour l'authentification et le type de contenu
-    final headers = {
-      "Authorization":
-          "Bearer votre_token", // Remplacez 'votre_token' par le vrai token
-      "Content-Type": "application/json",
-    };
-
-    // Corps de la requête, encodé en JSON
-    final body = jsonEncode({"contenu": title});
-
     try {
-      // Envoi de la requête POST avec les en-têtes et le corps JSON
-      final response = await http.post(
-        uri,
-        headers: headers,
-        body: body,
-      );
+      final reponse = await http.post(uri, body: jsonEncode(body), headers: {
+        'Content-Type': 'application/json',
+      });
 
-      if (response.statusCode == 200) {
-        print("Tâche ajoutée : $title");
+      if (reponse.statusCode == 401) {
+        titleController.text = '';
+
+        final prefs = await SharedPreferences.getInstance();
+        List<String> tasks = prefs.getStringList('tasks') ?? [];
+        tasks.add(titre);
+        await prefs.setStringList('tasks', tasks);
+
+        showSuccessMessage('Tâche ajoutée');
       } else {
-        print("Erreur lors de l'ajout de la tâche : ${response.statusCode}");
-        print(
-            "Message de l'erreur : ${response.body}"); // Affiche la réponse complète pour le débogage
+        showErrorMessage('Tâche refusée');
+        // ignore: avoid_print
+        print(reponse.body);
       }
-    } catch (e) {
-      print("Une erreur est survenue : $e"); // Affiche toute autre erreur
+    } finally {
+      if (!_primaryCompleter.isCompleted) {
+        _primaryCompleter.complete();
+      }
     }
+  }
+
+  void showSuccessMessage(String message) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      backgroundColor: Colors.green,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  void showErrorMessage(String message) {
+    final snackBar = SnackBar(
+      content: Text(
+        message,
+        style: const TextStyle(),
+      ),
+      backgroundColor: Colors.red,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

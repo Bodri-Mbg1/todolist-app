@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'dart:async';
 import 'package:todolist_app/pages/page1.dart';
 
 class Page2 extends StatefulWidget {
@@ -17,9 +15,7 @@ class _Page2State extends State<Page2> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  // Fonction d'inscription avec vérification des champs
   void regist(String user, String email, String password) async {
-    // Vérifiez que tous les champs sont remplis
     if (user.isEmpty || email.isEmpty || password.isEmpty) {
       _showErrorDialog("Veuillez remplir tous les champs");
       return;
@@ -29,7 +25,7 @@ class _Page2State extends State<Page2> {
       final response = await http.post(
         Uri.parse(
             'https://todolist-api-production-1e59.up.railway.app/auth/inscription'),
-        headers: {'Content-Type': 'application/json'}, // En-tête JSON
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           "nom": user,
           "email": email,
@@ -40,10 +36,11 @@ class _Page2State extends State<Page2> {
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
         String accessToken = data['accessToken'];
+        // ignore: avoid_print
         print('Inscription réussie. Token: $accessToken');
 
-        // Rediriger vers la page de connexion après création de compte
         Navigator.pushReplacement(
+          // ignore: use_build_context_synchronously
           context,
           MaterialPageRoute(builder: (context) => const Page1()),
         );
@@ -52,11 +49,14 @@ class _Page2State extends State<Page2> {
         String errorMessage = errorData['message'];
         _showErrorDialog(errorMessage);
       } else {
+        // ignore: avoid_print
         print('Erreur lors de l\'inscription: ${response.statusCode}');
+        // ignore: avoid_print
         print('Message de l\'API: ${response.body}');
         _showErrorDialog("Erreur inconnue lors de l'inscription.");
       }
     } catch (e) {
+      // ignore: avoid_print
       print('Erreur lors de l\'inscription: $e');
       _showErrorDialog("Une erreur s'est produite. Veuillez réessayer.");
     }
@@ -73,7 +73,7 @@ class _Page2State extends State<Page2> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Fermer le dialogue
+                Navigator.of(context).pop();
               },
               child: const Text('OK'),
             ),
@@ -204,6 +204,46 @@ class _Page2State extends State<Page2> {
                               ),
                             ),
                           ),
+                        ),
+                      ),
+                      Padding(
+                        padding:
+                            const EdgeInsets.only(left: 20, right: 20, top: 50),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 0),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 5),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    "Vous avez déjà un compte ?",
+                                    style: TextStyle(
+                                        fontSize: 15, color: Colors.white),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => const Page2(),
+                                        ),
+                                      );
+                                    },
+                                    child: const Text(
+                                      "Connexion",
+                                      style: TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
