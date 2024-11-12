@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:todolist_app/pages/page1.dart';
 
@@ -36,6 +37,10 @@ class _Page2State extends State<Page2> {
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
         String accessToken = data['accessToken'];
+        // ignore: unused_local_variable
+        String nom = data['nom'];
+        // ignore: unused_local_variable
+        String email = data['email'];
         // ignore: avoid_print
         print('Inscription réussie. Token: $accessToken');
 
@@ -60,6 +65,15 @@ class _Page2State extends State<Page2> {
       print('Erreur lors de l\'inscription: $e');
       _showErrorDialog("Une erreur s'est produite. Veuillez réessayer.");
     }
+  }
+
+  // ignore: unused_element
+  Future<void> _storeUserData(
+      String token, String username, String email) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('accessToken', token);
+    await prefs.setString('username', username);
+    await prefs.setString('email', email);
   }
 
   // Méthode pour afficher un dialogue d'erreur

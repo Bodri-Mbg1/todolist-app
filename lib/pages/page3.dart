@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:todolist_app/pages/user.dart';
 import 'dart:convert';
+
+import 'package:todolist_app/pages/user.dart';
 
 class Page3 extends StatefulWidget {
   const Page3({super.key});
@@ -65,23 +66,14 @@ class _Page3State extends State<Page3> {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode(
-            {'contenu': contenu}), // Assurez-vous que c'est 'name' ici
+        body: jsonEncode({'contenu': contenu}),
       );
 
       if (response.statusCode == 201) {
         _recupererTaches();
       } else {
-        final Map<String, dynamic> errorData = jsonDecode(response.body);
-        // ignore: unused_local_variable
-        String errorMessage =
-            errorData['message'] != null && errorData['message'].isNotEmpty
-                ? errorData['message'].join(', ')
-                : "Erreur inconnue. Veuillez réessayer.";
         // ignore: avoid_print
         print('Erreur lors de l\'ajout de la tâche : ${response.statusCode}');
-        // ignore: avoid_print
-        print('Corps de la réponse : ${response.body}');
       }
     } catch (e) {
       // ignore: avoid_print
@@ -89,11 +81,10 @@ class _Page3State extends State<Page3> {
     }
   }
 
-  Future<void> modifierTache(String idTache, String nomMiseAJour) async {
+  Future<void> modifierTache(String idTache, String nouveauNom) async {
     final url = Uri.parse(
         'https://todolist-api-production-1e59.up.railway.app/task/$idTache');
-    final corps =
-        jsonEncode({'name': nomMiseAJour}); // Assurez-vous que c'est 'name'
+    final corps = jsonEncode({'contenu': nouveauNom});
     final token = await recupererToken();
     if (token == null) {
       // ignore: avoid_print
@@ -153,6 +144,38 @@ class _Page3State extends State<Page3> {
     return prefs.getString('accessToken');
   }
 
+  void afficherDialogueModification(String idTache) {
+    TextEditingController nouveauNomController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Modifier la tâche"),
+          content: TextField(
+            controller: nouveauNomController,
+            decoration: const InputDecoration(hintText: "Nouveau nom de tâche"),
+          ),
+          actions: [
+            TextButton(
+              child: const Text("Annuler"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text("Sauvegarder"),
+              onPressed: () {
+                modifierTache(idTache, nouveauNomController.text);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -204,9 +227,7 @@ class _Page3State extends State<Page3> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
             TextField(
               controller: _controller,
               decoration: const InputDecoration(
@@ -221,9 +242,7 @@ class _Page3State extends State<Page3> {
                 ),
               ),
             ),
-            const SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
             InkWell(
               onTap: () {
                 if (_controller.text.isNotEmpty) {
@@ -248,9 +267,7 @@ class _Page3State extends State<Page3> {
                 ),
               ),
             ),
-            SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
                 itemCount: taches.length,
@@ -262,27 +279,22 @@ class _Page3State extends State<Page3> {
                       size: 15,
                       color: Color(0xff0095a3),
                     ),
-                    title: Text(tache['contenu'] ??
-                        'Tâche sans nom'), // Tâche sans nom si 'name' est null
+                    title: Text(tache['contenu'] ?? 'Tâche sans nom'),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
                           icon: const Icon(Icons.edit),
                           onPressed: () {
-                            final idTache =
-                                tache['id']; // Récupérer l'ID tel quel
-                            modifierTache(idTache,
-                                'Nom Tâche Modifié'); // Utiliser directement l'ID
+                            final idTache = tache['id'];
+                            afficherDialogueModification(idTache);
                           },
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete),
                           onPressed: () {
-                            final idTache =
-                                tache['id']; // Récupérer l'ID tel quel
-                            supprimerTache(
-                                idTache); // Utiliser directement l'ID
+                            final idTache = tache['id'];
+                            supprimerTache(idTache);
                           },
                         ),
                       ],

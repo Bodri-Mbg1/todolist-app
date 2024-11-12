@@ -79,6 +79,7 @@ class _Page1State extends State<Page1> {
   Future<void> _storeToken(String token) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('accessToken', token);
+
     // ignore: avoid_print
     print("Token sauvegardé avec succès : $token");
   }
