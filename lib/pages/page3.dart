@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todolist_app/pages/user.dart';
 import 'dart:convert';
 
 class Page3 extends StatefulWidget {
@@ -155,12 +156,58 @@ class _Page3State extends State<Page3> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Mes Tâches")),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(18.0),
-            child: TextField(
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Text(
+          "Todolist",
+          style: TextStyle(
+            fontSize: 28,
+            fontFamily: 'FontsFree',
+            fontWeight: FontWeight.bold,
+            letterSpacing: -2.0,
+            color: Colors.black,
+          ),
+        ),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Color(0xff0095a3),
+              ),
+              child: Text(
+                'Menu',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('Infos Utilisateur'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const User()),
+                );
+              },
+            ),
+            // Ajoutez d’autres options ici si nécessaire
+          ],
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(18.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(
+              height: 20,
+            ),
+            TextField(
               controller: _controller,
               decoration: const InputDecoration(
                 enabledBorder: OutlineInputBorder(
@@ -169,71 +216,83 @@ class _Page3State extends State<Page3> {
                 ),
                 border: OutlineInputBorder(),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.black),
+                  borderSide: BorderSide(color: Color(0xff0095a3)),
                   borderRadius: BorderRadius.all(Radius.circular(8.0)),
                 ),
               ),
             ),
-          ),
-          InkWell(
-            onTap: () {
-              if (_controller.text.isNotEmpty) {
-                ajouterTache(_controller.text);
-                _controller.clear();
-              }
-            },
-            child: Container(
-              height: 50,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-              ),
-              child: const Center(
-                child: Text(
-                  "Ajouter",
-                  style: TextStyle(
-                    color: Color(0xff0095a3),
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+            const SizedBox(
+              height: 20,
+            ),
+            InkWell(
+              onTap: () {
+                if (_controller.text.isNotEmpty) {
+                  ajouterTache(_controller.text);
+                  _controller.clear();
+                }
+              },
+              child: Container(
+                height: 50,
+                decoration: const BoxDecoration(
+                  color: Color(0xff0095a3),
+                ),
+                child: const Center(
+                  child: Text(
+                    "Ajouter",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: taches.length,
-              itemBuilder: (context, index) {
-                final tache = taches[index];
-                return ListTile(
-                  title: Text(tache['contenu'] ??
-                      'Tâche sans nom'), // Tâche sans nom si 'name' est null
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () {
-                          final idTache =
-                              tache['id']; // Récupérer l'ID tel quel
-                          modifierTache(idTache,
-                              'Nom Tâche Modifié'); // Utiliser directement l'ID
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () {
-                          final idTache =
-                              tache['id']; // Récupérer l'ID tel quel
-                          supprimerTache(idTache); // Utiliser directement l'ID
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              },
+            SizedBox(
+              height: 20,
             ),
-          ),
-        ],
+            Expanded(
+              child: ListView.builder(
+                itemCount: taches.length,
+                itemBuilder: (context, index) {
+                  final tache = taches[index];
+                  return ListTile(
+                    leading: const Icon(
+                      Icons.brightness_1,
+                      size: 15,
+                      color: Color(0xff0095a3),
+                    ),
+                    title: Text(tache['contenu'] ??
+                        'Tâche sans nom'), // Tâche sans nom si 'name' est null
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () {
+                            final idTache =
+                                tache['id']; // Récupérer l'ID tel quel
+                            modifierTache(idTache,
+                                'Nom Tâche Modifié'); // Utiliser directement l'ID
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () {
+                            final idTache =
+                                tache['id']; // Récupérer l'ID tel quel
+                            supprimerTache(
+                                idTache); // Utiliser directement l'ID
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -176,7 +176,7 @@ class _Page1State extends State<Page1> {
                       const SizedBox(height: 5),
                       TextFormField(
                         controller: passwordController,
-                        obscureText: true,
+                        obscureText: passToggle,
                         decoration: InputDecoration(
                           enabledBorder: const OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.white),
