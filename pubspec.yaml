@@ -38,6 +38,7 @@ dependencies:
   flutter_image: ^4.1.11
   http: ^1.2.2
   shared_preferences: ^2.3.2
+  go_router: ^14.3.0
 
 dev_dependencies:
   flutter_test:

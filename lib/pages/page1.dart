@@ -49,7 +49,8 @@ class _Page1State extends State<Page1> {
         // ignore: avoid_print
         print('Connexion réussie. Token: $accessToken');
 
-        await _storeToken(accessToken);
+        await _storeToken(accessToken); // Enregistrer le token
+        await _verifyStoredToken(); // Vérifier le token stocké
 
         Navigator.pushReplacement(
           // ignore: use_build_context_synchronously
@@ -59,7 +60,6 @@ class _Page1State extends State<Page1> {
       } else if (response.statusCode == 401) {
         _showErrorDialog("Identifiants invalides. Veuillez réessayer.");
       } else {
-        // Récupérer et afficher le message d'erreur de l'API
         final Map<String, dynamic> errorData = jsonDecode(response.body);
         String errorMessage =
             errorData['message'] != null && errorData['message'].isNotEmpty
@@ -79,6 +79,16 @@ class _Page1State extends State<Page1> {
   Future<void> _storeToken(String token) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('accessToken', token);
+    // ignore: avoid_print
+    print("Token sauvegardé avec succès : $token");
+  }
+
+  // Méthode pour vérifier que le token est stocké correctement
+  Future<void> _verifyStoredToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('accessToken');
+    // ignore: avoid_print
+    print("Token vérifié après stockage : $token");
   }
 
   // Méthode pour afficher un dialogue d'erreur
