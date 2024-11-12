@@ -15,6 +15,7 @@ class _Page2State extends State<Page2> {
   TextEditingController userController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  bool passToggle = true;
 
   void regist(String user, String email, String password) async {
     if (user.isEmpty || email.isEmpty || password.isEmpty) {
@@ -183,17 +184,30 @@ class _Page2State extends State<Page2> {
                       const SizedBox(height: 5),
                       TextFormField(
                         controller: passwordController,
-                        decoration: const InputDecoration(
-                          enabledBorder: OutlineInputBorder(
+                        obscureText: passToggle,
+                        decoration: InputDecoration(
+                          enabledBorder: const OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.white),
                             borderRadius:
                                 BorderRadius.all(Radius.circular(1.0)),
                           ),
-                          border: OutlineInputBorder(),
-                          focusedBorder: OutlineInputBorder(
+                          border: const OutlineInputBorder(),
+                          focusedBorder: const OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.white),
                             borderRadius:
                                 BorderRadius.all(Radius.circular(8.0)),
+                          ),
+                          suffix: InkWell(
+                            onTap: () {
+                              setState(
+                                () {
+                                  passToggle = !passToggle;
+                                },
+                              );
+                            },
+                            child: Icon(passToggle
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined),
                           ),
                         ),
                       ),
